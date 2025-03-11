@@ -1,4 +1,3 @@
-# Very simple example of how to setup network
 import sys
 import re
 import urequests as requests
@@ -21,10 +20,12 @@ def extract_recipe_number(text: str) -> list:
     p=re.compile(pattern)
     s = p.split( text )
     for id in s:
-        m=re.match("\d+",id)
+        m=re.match("(\d+)/[a-zA-Z0-9\-]+\'>([a-zA-Z0-9\-\ ]+)<",id)
         if m:
             print(m.group(0))
-            recipelist.append(m.group(0))
+            print(m.group(1))
+            print(m.group(2))
+            recipelist.append([m.group(1),m.group(2)])
     return(recipelist)
 
 def fetch_recipe_numbers():
