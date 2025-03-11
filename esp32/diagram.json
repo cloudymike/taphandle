@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "author": "Cloudymike",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 71.9,
+      "left": -24.2,
+      "attrs": { "env": "micropython-20220618-v1.19.1" }
+    }
+  ],
+  "connections": [ [ "esp:TX0", "$serialMonitor:RX", "", [] ], [ "esp:RX0", "$serialMonitor:TX", "", [] ] ],
+  "dependencies": {}
+}
