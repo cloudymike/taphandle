@@ -94,7 +94,9 @@ def buttonPressed():
 # Scoll one item in list for each time button pressed
 # When no more scrolling for 10s return recipe item.
 def scroll(oled,scrollList):
-    for current in range(len(scrollList)+1):
+    if not len(scrollList):
+        return([])
+    for current in range(1,len(scrollList)+1,1):
         displayList(oled,scrollList[0:current])
         if not buttonPressed():
             break
