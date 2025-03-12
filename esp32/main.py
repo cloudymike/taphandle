@@ -5,6 +5,10 @@ import urequests as requests
 import wlan
 import network
 
+from machine import Pin, I2C
+import ssd1306
+from time import sleep, sleep_ms
+
 def extract_recipe_number(text: str) -> list:
     """
     Extracts all numbers following the viewrecipe pattern in the text.
@@ -60,11 +64,86 @@ def fetch_recipe_numbers():
     return(recipelist)
 
 
-if __name__ == "__main__":
-    mynetwork = wlan.do_connect('wlan_test')
+def displayList(oled,scrollList):
+    oled.fill(0)
+    i=1
+    for recipe in scrollList:
+        oled.text(recipe[1], 0, (len(scrollList)-i)*10)
+        i=i+1
+    oled.show()
+
+def makeList():
+    scrollList=[]
+    for number in range(15):
+        recipe=[str(number),'Hello, World {}'.format(number)]
+        scrollList.append(recipe)
+    return(scrollList)
+
+def buttonPressed():
+    waittime=0
+    while not sw.value():
+        sleep_ms(10)
+    while waittime<100:
+        if sw.value():
+            waittime=waittime+1
+        else:
+            return(True)
+        sleep(0.1)
+    return(False)
+
+# Scoll one item in list for each time button pressed
+# When no more scrolling for 10s return recipe item.
+def scroll(oled,scrollList):
+    for current in range(len(scrollList)+1):
+        displayList(oled,scrollList[0:current])
+        if not buttonPressed():
+            break
+    return(scrollList[current-1])
 
 
-    recipelist=fetch_recipe_numbers()
-    print(recipelist)
 
-    print("All done!")
+# ESP32 Pin assignment
+sw = Pin(13, Pin.IN, Pin.PULL_UP) 
+
+i2c = I2C(-1, scl=Pin(22), sda=Pin(21))
+
+# Reset OLED
+oledReset=Pin(16, Pin.OUT)
+oledReset.value(0)
+sleep_ms(500)
+oledReset.value(1)
+
+oled_width = 128
+oled_height = 64
+oled = ssd1306.SSD1306_I2C(oled_width, oled_height, i2c)
+
+oled.fill(0)
+oled.text('Starting...', 10, 30)
+oled.show()
+
+mynetwork = wlan.do_connect('wlan_test')
+
+oled.fill(0)
+oled.text('Fetching', 0, 30)
+oled.text('  recipies...', 0, 40)
+oled.show()
+
+recipelist=fetch_recipe_numbers()
+print(recipelist)
+
+oled.fill(0)
+oled.text('Push button', 0, 10)
+oled.text('to scroll recipies', 0, 20)
+oled.text('Stop when recipe', 0, 30)
+oled.text('is found and', 0, 40)
+oled.text('on top of list', 0, 50)
+oled.show()
+buttonPressed()
+recipe=scroll(oled,recipelist)
+
+oled.fill(0)
+oled.text(recipe[1],0,40)
+oled.text('The end!', 60, 49)
+oled.show()
+
+print("All done!")
