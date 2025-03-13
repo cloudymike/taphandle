@@ -113,7 +113,7 @@ def getBSMX(recipe_number):
 	return(bsmx)
 
 def getRecipeField(fieldID, bsmx):
-	searchString="<{}>([a-zA-Z0-9\.\ ]+)</{}>".format(fieldID,fieldID)
+	searchString="<{}>([a-zA-Z0-9\.\-\ ]+)</{}>".format(fieldID,fieldID)
 	m=re.search(searchString,bsmx)
 	if m:
 	    return(m.group(1))
@@ -174,11 +174,17 @@ recipe=scroll(oled,recipelist)
 
 bsmx=getBSMX(recipe[0])
 OG=getRecipeField("F_R_OG_MEASURED",bsmx)
+FG=getRecipeField("F_R_FG_MEASURED",bsmx)
+ABV=round((float(OG) - float(FG)) * 131.25,1)
+brewDate=getRecipeField("F_R_DATE",bsmx)
+beerStyle=getRecipeField("F_S_NAME",bsmx)
 
 oled.fill(0)
 oled.text(recipe[1],0,0)
-oled.text("OG: {}".format(OG),0,10)
-oled.text('The end!', 60, 49)
+oled.text(beerStyle,0,10)
+oled.text(brewDate,0,20)
+oled.text("ABV: {}%".format(ABV),0,30)
+oled.text('The end!', 60, 50)
 oled.show()
 
 print("All done!")

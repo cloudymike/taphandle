@@ -24,7 +24,7 @@ def getBSMX(recipe_number):
 	return(bsmx)
 
 def getRecipeField(fieldID, bsmx):
-	searchString="<{}>([a-zA-Z0-9\.\ ]+)</{}>".format(fieldID,fieldID)
+	searchString="<{}>([a-zA-Z0-9\.\ \-]+)</{}>".format(fieldID,fieldID)
 	m=re.search(searchString,bsmx)
 	if m:
 	    return(m.group(1))
@@ -35,7 +35,15 @@ recipe_number=5080296
 bsmx=getBSMX(recipe_number)
 OG=getRecipeField("F_R_OG_MEASURED",bsmx)
 recipeName=getRecipeField("F_R_NAME",bsmx)
+FG=getRecipeField("F_R_FG_MEASURED",bsmx)
+ABV=round((float(OG) - float(FG)) * 131.25,1)
+brewDate=getRecipeField("F_R_DATE",bsmx)
+beerStyle=getRecipeField("F_S_NAME",bsmx)
 
 print(recipeName)
 print("OG: {}".format(OG))
+print("FG: {}".format(FG))
+print("ABV: {}%".format(ABV))
+print("Brew date: {}".format(brewDate))
+print("Beerstyle: {}".format(beerStyle))
 
