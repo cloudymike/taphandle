@@ -42,23 +42,23 @@ def fetch_recipe_numbers():
         url = f"{base_url}{page_number}"
         try:
             response = requests.get(url)
-            
-            # Check if the request was successful and content is not empty
-            if response.status_code != 200 or not response.content.strip():
-                print(f"No data found at page {page_number}. Exiting.")
-                break
-            
-            # Extract names using regex for viewrecipe links
-            matches = extract_recipe_number(response.text)
-            if matches:
-                recipelist.extend(matches)
-            else:
-                print(f"No recipes found on page {page_number}.")
-                return(recipelist)
-
         except:
             print(f"Error fetching page {page_number}")
             break
+        
+        # Check if the request was successful and content is not empty
+        if response.status_code != 200 or not response.content.strip():
+            print(f"No data found at page {page_number}. Exiting.")
+            break
+        
+        # Extract names using regex for viewrecipe links
+        matches = extract_recipe_number(response.text)
+        if matches:
+            recipelist.extend(matches)
+        else:
+            print(f"No recipes found on page {page_number}.")
+            return(recipelist)
+
         
         page_number += 1
     return(recipelist)
@@ -90,6 +90,35 @@ def buttonPressed():
             return(True)
         sleep(0.1)
     return(False)
+
+
+def getBSMX(recipe_number):
+	base_url="https://beersmithrecipes.com/download.php?id="
+	url = f"{base_url}{str(recipe_number)}"
+	print(url)
+	try:
+	    response = requests.get(url)
+	    
+	    # Check if the request was successful and content is not empty
+	    if response.status_code != 200 or not response.content.strip():
+	        print(f"No data found for recipe {recipe_number}. Exiting.")
+	        bsmx=None
+	    else:
+	        bsmx=response.text
+
+	except requests.RequestException as e:
+	    print(f"Error fetching page {page_number}: {e}")
+	    bsmx=None
+
+	return(bsmx)
+
+def getRecipeField(fieldID, bsmx):
+	searchString="<{}>([a-zA-Z0-9\.\ ]+)</{}>".format(fieldID,fieldID)
+	m=re.search(searchString,bsmx)
+	if m:
+	    return(m.group(1))
+	else:
+		return("")
 
 # Scoll one item in list for each time button pressed
 # When no more scrolling for 10s return recipe item.
@@ -143,8 +172,12 @@ oled.show()
 buttonPressed()
 recipe=scroll(oled,recipelist)
 
+bsmx=getBSMX(recipe[0])
+OG=getRecipeField("F_R_OG_MEASURED",bsmx)
+
 oled.fill(0)
-oled.text(recipe[1],0,40)
+oled.text(recipe[1],0,0)
+oled.text("OG: {}".format(OG),0,10)
 oled.text('The end!', 60, 49)
 oled.show()
 
