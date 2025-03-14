@@ -5,8 +5,7 @@ import urequests as requests
 import wlan
 import network
 
-from machine import Pin, I2C
-import ssd1306
+from machine import Pin
 from time import sleep, sleep_ms
 import textout
 
@@ -121,24 +120,24 @@ def scroll(tout, scrollList):
 # ESP32 Pin assignment
 sw = Pin(13, Pin.IN, Pin.PULL_UP) 
 txtout = textout.textout()
-oled=txtout.display()
 
-txtout.centerline('Starting...')
+txtout.text('Starting...')
 
 mynetwork = wlan.do_connect('wlan_test')
 
-txtout.leftline('Fetching', 4)
-txtout.rightline('  recipies...', 5)
+txtout.text('Fetching...')
 
 recipelist=fetch_recipe_numbers()
 print(recipelist)
-
+txtout.clear()
 txtout.leftline('Push button', 1)
 txtout.leftline('to scroll recipies', 2)
 txtout.leftline('Stop when recipe', 3)
 txtout.leftline('is found and', 4)
 txtout.leftline('on top of list', 5)
+txtout.show()
 buttonPressed()
+txtout.clear()
 recipe=scroll(txtout, recipelist)
 
 bsmx=getBSMX(recipe[0])
@@ -148,9 +147,10 @@ ABV=round((float(OG) - float(FG)) * 131.25,1)
 brewDate=getRecipeField("F_R_DATE",bsmx)
 beerStyle=getRecipeField("F_S_NAME",bsmx)
 
+txtout.clear()
 txtout.leftline(recipe[1],0)
 txtout.leftline(beerStyle,1)
 txtout.leftline(brewDate,2)
 txtout.leftline("ABV: {}%".format(ABV),3)
-
+txtout.show()
 print("All done!")
