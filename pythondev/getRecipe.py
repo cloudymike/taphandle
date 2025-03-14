@@ -33,8 +33,10 @@ def getRecipeField(fieldID, bsmx):
 
 recipe_number=5080296
 bsmx=getBSMX(recipe_number)
-OG=getRecipeField("F_R_OG_MEASURED",bsmx)
 recipeName=getRecipeField("F_R_NAME",bsmx)
+
+
+OG=getRecipeField("F_R_OG_MEASURED",bsmx)
 FG=getRecipeField("F_R_FG_MEASURED",bsmx)
 ABV=round((float(OG) - float(FG)) * 131.25,1)
 brewDate=getRecipeField("F_R_DATE",bsmx)

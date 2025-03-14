@@ -8,6 +8,7 @@ import network
 from machine import Pin, I2C
 import ssd1306
 from time import sleep, sleep_ms
+import textout
 
 def extract_recipe_number(text: str) -> list:
     """
@@ -63,22 +64,6 @@ def fetch_recipe_numbers():
         page_number += 1
     return(recipelist)
 
-
-def displayList(oled,scrollList):
-    oled.fill(0)
-    i=1
-    for recipe in scrollList:
-        oled.text(recipe[1], 0, (len(scrollList)-i)*10)
-        i=i+1
-    oled.show()
-
-def makeList():
-    scrollList=[]
-    for number in range(15):
-        recipe=[str(number),'Hello, World {}'.format(number)]
-        scrollList.append(recipe)
-    return(scrollList)
-
 def buttonPressed():
     waittime=0
     while not sw.value():
@@ -90,7 +75,6 @@ def buttonPressed():
             return(True)
         sleep(0.1)
     return(False)
-
 
 def getBSMX(recipe_number):
 	base_url="https://beersmithrecipes.com/download.php?id="
@@ -122,55 +106,40 @@ def getRecipeField(fieldID, bsmx):
 
 # Scoll one item in list for each time button pressed
 # When no more scrolling for 10s return recipe item.
-def scroll(oled,scrollList):
-    if not len(scrollList):
-        return([])
-    for current in range(1,len(scrollList)+1,1):
-        displayList(oled,scrollList[0:current])
+def scroll(tout, scrollList):
+    for current in range(len(scrollList)+1):
+        element=scrollList[current]
+        recipeName=element[1]
+        tout.terminalline(recipeName)
         if not buttonPressed():
             break
     return(scrollList[current-1])
 
 
 
+
 # ESP32 Pin assignment
 sw = Pin(13, Pin.IN, Pin.PULL_UP) 
+txtout = textout.textout()
+oled=txtout.display()
 
-i2c = I2C(-1, scl=Pin(22), sda=Pin(21))
-
-# Reset OLED
-oledReset=Pin(16, Pin.OUT)
-oledReset.value(0)
-sleep_ms(500)
-oledReset.value(1)
-
-oled_width = 128
-oled_height = 64
-oled = ssd1306.SSD1306_I2C(oled_width, oled_height, i2c)
-
-oled.fill(0)
-oled.text('Starting...', 10, 30)
-oled.show()
+txtout.centerline('Starting...')
 
 mynetwork = wlan.do_connect('wlan_test')
 
-oled.fill(0)
-oled.text('Fetching', 0, 30)
-oled.text('  recipies...', 0, 40)
-oled.show()
+txtout.leftline('Fetching', 4)
+txtout.rightline('  recipies...', 5)
 
 recipelist=fetch_recipe_numbers()
 print(recipelist)
 
-oled.fill(0)
-oled.text('Push button', 0, 10)
-oled.text('to scroll recipies', 0, 20)
-oled.text('Stop when recipe', 0, 30)
-oled.text('is found and', 0, 40)
-oled.text('on top of list', 0, 50)
-oled.show()
+txtout.leftline('Push button', 1)
+txtout.leftline('to scroll recipies', 2)
+txtout.leftline('Stop when recipe', 3)
+txtout.leftline('is found and', 4)
+txtout.leftline('on top of list', 5)
 buttonPressed()
-recipe=scroll(oled,recipelist)
+recipe=scroll(txtout, recipelist)
 
 bsmx=getBSMX(recipe[0])
 OG=getRecipeField("F_R_OG_MEASURED",bsmx)
@@ -179,12 +148,9 @@ ABV=round((float(OG) - float(FG)) * 131.25,1)
 brewDate=getRecipeField("F_R_DATE",bsmx)
 beerStyle=getRecipeField("F_S_NAME",bsmx)
 
-oled.fill(0)
-oled.text(recipe[1],0,0)
-oled.text(beerStyle,0,10)
-oled.text(brewDate,0,20)
-oled.text("ABV: {}%".format(ABV),0,30)
-oled.text('The end!', 60, 50)
-oled.show()
+txtout.leftline(recipe[1],0)
+txtout.leftline(beerStyle,1)
+txtout.leftline(brewDate,2)
+txtout.leftline("ABV: {}%".format(ABV),3)
 
 print("All done!")
