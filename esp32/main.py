@@ -103,6 +103,19 @@ def getRecipeField(fieldID, bsmx):
 	else:
 		return("")
 
+def getIBU(bsmx):
+	ibu=0
+	pattern="<F_H_IBU_CONTRIB>"
+	p=re.compile(pattern)
+	s = p.split( bsmx )
+	for id in s:
+		m=re.match("([0-9\.]+)</F_H_IBU_CONTRIB>",id)
+		if m:
+			print(m.group(1))
+			ibu = ibu+float(m.group(1))
+	return(ibu)
+
+
 # Scoll one item in list for each time button pressed
 # When no more scrolling for 10s return recipe item.
 def scroll(tout, scrollList):
@@ -146,11 +159,14 @@ FG=getRecipeField("F_R_FG_MEASURED",bsmx)
 ABV=round((float(OG) - float(FG)) * 131.25,1)
 brewDate=getRecipeField("F_R_DATE",bsmx)
 beerStyle=getRecipeField("F_S_NAME",bsmx)
+IBU=getIBU(bsmx)
 
 txtout.clear()
 txtout.leftline(recipe[1],0)
 txtout.leftline(beerStyle,1)
 txtout.leftline(brewDate,2)
 txtout.leftline("ABV: {}%".format(ABV),3)
+txtout.leftline("IBU: {}".format(round(IBU)),4)
+txtout.leftline("OG: {}".format(OG[:5]),5)
 txtout.show()
 print("All done!")
