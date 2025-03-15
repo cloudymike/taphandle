@@ -2,7 +2,7 @@ import requests
 import re
 import sys
 
-def extract_recipe_number(text: str) -> list:
+def extract_recipe_number(text: str):
     """
     Extracts all numbers following the viewrecipe pattern in the text.
 
@@ -17,8 +17,10 @@ def extract_recipe_number(text: str) -> list:
     p=re.compile(pattern)
     s = p.split( text )
     for id in s:
-        m=re.match("(\d+)/.*>(.*)<",id)
+        m=re.match("(\d+)/[a-zA-Z0-9\-]+\'>([a-zA-Z0-9\-\ ]+)<",id)
         if m:
+            print(m.group(2))
+            print(m.group(1))
             recipelist.append([m.group(1),m.group(2)])
     return(recipelist)
 
