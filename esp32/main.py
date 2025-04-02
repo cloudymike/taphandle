@@ -125,7 +125,7 @@ def scroll(tout, scrollList):
         tout.terminalline(recipeName)
         if not buttonPressed():
             break
-    return(scrollList[current-1])
+    return(scrollList[current])
 
 
 
